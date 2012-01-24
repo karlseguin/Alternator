@@ -1,4 +1,6 @@
 mongo = require('mongodb')
+messages = require('./messages')
+validator = require('./validator')
 
 class Alternator
   @commandLookup: 
@@ -30,9 +32,9 @@ class Alternator
     @db.collection('ddb_tables')
 
   @createTable: (data, callback) =>
+    return unless validator.createTable(data, callback)
     tableName = data.TableName
-    return unless Validator.tableName(tableName, callback)
-    
+
     doc =
       _id: tableName,
       details:
@@ -43,7 +45,7 @@ class Alternator
         TableStatus: 'ACTIVE'
 
     this.systemCollection().insert doc, {safe: true}, (err) ->
-      return callback(Errors.duplicateTableName(tableName), null) if err && err.code == 11000
+      return callback(messages.duplicateTableName(tableName), null) if err && err.code == 11000
       return callback(err, null) if err
       doc.details.TableStatus = 'CREATING'
       callback(null, {TableDescription: doc.details})
@@ -70,7 +72,7 @@ class Alternator
 
     this.tableDetails tableName, (err, details) =>
       return callback(err, null) if err?
-      return callback(Errors.tableNotFound(tableName), null) unless details?
+      return callback(messages.tableNotFound(tableName), null) unless details?
 
       this.systemCollection().remove {_id: tableName}, (err) =>
         return callback(err, null) if err?
@@ -84,29 +86,3 @@ class Alternator
       callback(null, if value? then value.details else null)
 
 module.exports = Alternator
-
-class Errors
-  @duplicateTableName: (name) ->
-    return {
-      __type: 'com.amazonaws.dynamodb.v20111205#ResourceInUseException'
-      message: 'Attempt to change a resource which is still in use: Duplicate table name: ' +  name
-    }
-  @invalidTableName: ->
-    return {
-      __type: 'com.amazon.coral.validate#ValidationExceptio'
-      message: "The paramater 'tableName' must be at least 3 characters long and at most 255 characters long"
-    }
-  @tableNotFound: (name) ->
-    return {
-      type: 'com.amazonaws.dynamodb.v20111205#ResourceNotFoundException'
-      message: 'Requested resource not found: Table: ' + name + ' not found'
-    }
-
-class Validator
-  @tableName: (name, callback) ->
-    if !name? || name.length < 3 || name.length > 255
-      callback(Errors.invalidTableName(), null) 
-      return false
-    return true
-
-

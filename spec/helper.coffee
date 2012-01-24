@@ -7,7 +7,9 @@ setupDatabase = (done) ->
     mongo = db
     db.collection('ddb_tables').drop ->
       db.collection('users').drop ->
-        done()
+        db.collection('ddb_tables').insert {_id: 'users'}, ->
+          done()
+        
 
 closeDatabase = ->
   mongo.close() if mongo?

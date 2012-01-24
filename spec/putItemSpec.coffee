@@ -20,6 +20,10 @@ describe 'putItem', ->
     @data.TableName = (n for n in [1..256]).join('')
     helper.assertRequestError 'putItem', @data, messages.invalidTableName(), false, done
 
+  it "returns an error on missing Item", (done) ->
+    delete @data.Item
+    helper.assertRequestError 'putItem', @data, messages.cannotBeNull('item'), true, done
+
   
 class Helper
   @validData: ->

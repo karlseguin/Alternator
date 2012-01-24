@@ -90,17 +90,19 @@ describe 'createTable', ->
     afterEach -> helper.closeDatabase()
 
     it "saves the table information", (done) ->
+      data.TableName = 'users2'
       helper.async (db) ->
         alternator.createTable @data, (err, response) ->
           expect(err).toBeNull()
           expect(response.TableDescription.TableStatus).toEqual('CREATING')
-          db.collection('ddb_tables').count {_id: 'users'}, (err, count) ->
+          db.collection('ddb_tables').count {_id: 'users2'}, (err, count) ->
             expect(count).toEqual(1)
             done()
 
     it "returns an error on duplicate tables", (done) ->
+      data.TableName = 'users2'
       helper.async (db) ->
         alternator.createTable @data, (err, response) ->
           alternator.createTable @data, (err, response) ->
-            expect(err).toEqual(messages.duplicateTableName('users'))
+            expect(err).toEqual(messages.duplicateTableName('users2'))
             done()

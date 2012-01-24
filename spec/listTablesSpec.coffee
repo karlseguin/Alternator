@@ -20,13 +20,14 @@ describe 'listTables', ->
     afterEach -> helper.closeDatabase()
 
     it "returns an empty list", (done) ->
-      helper.async ->
-        Helper.assertList {}, [], null, done
+      helper.async (db) ->
+        db.collection('ddb_tables').remove {}, ->
+          Helper.assertList {}, [], null, done
 
     it "lists the tables", (done) ->
       helper.async (db) ->
         db.collection('ddb_tables').insert [{_id: 'tableB'}, {_id: 'tableA'}], ->
-          Helper.assertList {}, ['tableA', 'tableB'], null, done
+          Helper.assertList {}, ['tableA', 'tableB', 'users'], null, done
 
     it "limits the tables returned the tables", (done) ->
       helper.async (db) ->
@@ -36,7 +37,7 @@ describe 'listTables', ->
     it "gets the table from the specified start", (done) ->
       helper.async (db) ->
         db.collection('ddb_tables').insert [{_id: 'tableB'}, {_id: 'tableA'} , {_id: 'tableC'}], ->
-          Helper.assertList {ExclusiveStartTableName: 'tableA'}, ['tableB', 'tableC'], null, done
+          Helper.assertList {ExclusiveStartTableName: 'tableA'}, ['tableB', 'tableC', 'users'], null, done
 
 
 class Helper

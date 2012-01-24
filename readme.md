@@ -18,4 +18,4 @@ You should configure your application to connect to your locally running alterna
 Until `.js` files are provided (once this thing isn't completely useless), you can start the server via `coffee app.coffee`.
 
 ## Errors
-By far the trickiest part to emulate will be the possible errors and other edge-cases. Hopefully the story will get better with time. As of now, we do try to handle the basic, such as creating a table which already exists or deleting a table which doesn't exist.
+By far the trickiest part to emulate will be the possible errors and other edge-cases. Hopefully the story will get better with time. As of now, we do try to handle the basic, such as creating a table which already exists, deleting a table which doesn't exist, and input validation.

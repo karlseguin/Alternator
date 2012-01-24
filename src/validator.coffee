@@ -19,19 +19,13 @@ class Validator
         Validator.notNull(data.ProvisionedThroughput.WriteCapacityUnits, 'provisionedThroughput.writeCapacityUnits', errors)
         Validator.notNull(data.ProvisionedThroughput.ReadCapacityUnits, 'provisionedThroughput.readCapacityUnits', errors)
 
-    if errors.length == 1
-      callback(errors[0], null) 
-      return false
+    Validator.handleErrors(errors, callback)
 
-    if errors.length > 1
-      error = 
-        __type: errors[0].__type
-        message: util.format("%d validation errors detected: %s", errors.length, (error.message for error in errors).join('; '))
-      callback(error, null)
-      return false
-      
-    true
-  
+  @listTables: (data, callback) ->
+    return unless typeof(data.ExclusiveStartTableName) == 'undefined' || Validator.tableName(data.ExclusiveStartTableName, callback)
+    return unless Validator.serializeToNumber(data.limit, callback)
+    return true
+
   @tableName: (name, callback) ->
     if !name? || name.length < 3 || name.length > 255
       callback(messages.invalidTableName(), null) 
@@ -56,6 +50,16 @@ class Validator
       errors.push(messages.cannotBeNull(name))
       return false
     return true
+
+  @handleErrors: (errors, callback) ->
+    return true if errors.length == 0
+
+    plural = if errors.length == 1 then '' else 's'
+    error = 
+      __type: errors[0].__type
+      message: util.format("%d validation error%s detected: %s", errors.length, plural, (error.message for error in errors).join('; '))
+    callback(error, null)
+    false
 
 
 module.exports = Validator

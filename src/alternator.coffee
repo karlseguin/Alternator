@@ -51,7 +51,9 @@ class Alternator
       callback(null, {TableDescription: doc.details})
 
   @listTables: (data, callback) =>
-    selector = if data.exclusiveStartTableName? then {_id: {$gt: data.exclusiveStartTableName}} else {}
+    return unless validator.listTables(data, callback)
+
+    selector = if data.ExclusiveStartTableName? then {_id: {$gt: data.ExclusiveStartTableName}} else {}
     options = {fields: {_id: true}, sort: [['_id', 'ascending']]}
     options.limit = data.Limit if data.Limit?
     

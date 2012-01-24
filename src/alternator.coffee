@@ -31,7 +31,7 @@ class Alternator
 
   @createTable: (data, callback) =>
     tableName = data.TableName
-    callback(Errors.invalidTableName(), null) if !tableName? || tableName.length < 3 || tableName.length > 255
+    return unless Validator.tableName(tableName, callback)
     
     doc =
       _id: tableName,
@@ -66,6 +66,8 @@ class Alternator
 
   @deleteTable: (data, callback) =>
     tableName = data.TableName
+    return unless Validator.tableName(tableName, callback)
+
     this.tableDetails tableName, (err, details) =>
       return callback(err, null) if err?
       return callback(Errors.tableNotFound(tableName), null) unless details?
@@ -99,3 +101,12 @@ class Errors
       type: 'com.amazonaws.dynamodb.v20111205#ResourceNotFoundException'
       message: 'Requested resource not found: Table: ' + name + ' not found'
     }
+
+class Validator
+  @tableName: (name, callback) ->
+    if !name? || name.length < 3 || name.length > 255
+      callback(Errors.invalidTableName(), null) 
+      return false
+    return true
+
+

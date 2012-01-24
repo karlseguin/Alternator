@@ -2,7 +2,7 @@
 The purpose of this project is to allow developers to locally develop against Amazon's DynamoDB. This is achieved by emulating DynamoDB via MongoDB.
 
 ## Usage
-At this time, and very uselessly, only `CreateTable`, `ListTables` and `DeleteTable` are supported. I'll start adding support for query/update/delete/insert operations after lunch (which I shall start to enjoy about 40 minutes from now).
+At this time, and very uselessly, only `CreateTable`, `ListTables` and `DeleteTable` are supported. Support for query/update/delete/insert operations will be done in the next few days.
 
 Configuration can be set by changing `config.js`. The `server` section indicates what host/port the server should listen on. The `db` section is the MongoDB information.
 

@@ -7,6 +7,7 @@ class Alternator
     CreateTable: 'createTable'
     ListTables: 'listTables'
     DeleteTable: 'deleteTable'
+    PutItem: 'putItem'
 
   @initialize: (config, callback) ->
     new mongo.Db(config.database, new mongo.Server(config.host, config.port, {})).open (err, db) ->
@@ -70,7 +71,7 @@ class Alternator
 
   @deleteTable: (data, callback) =>
     tableName = data.TableName
-    return unless validator.tableName(tableName, callback)
+    return unless validator.deleteTable(data, callback)
 
     this.tableDetails tableName, (err, details) =>
       return callback(err, null) if err?
@@ -81,6 +82,9 @@ class Alternator
         this.db.collection(tableName).drop (err) ->
           details.TableStatus = 'DELETING'
           callback(null, details)
+
+  @putItem: (data, callback) =>
+    return unless validator.putItem(data, callback)
   
   @tableDetails: (name, callback) =>
     this.systemCollection().findOne {_id: name}, (err, value) ->

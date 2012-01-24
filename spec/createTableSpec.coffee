@@ -12,6 +12,11 @@ describe 'createTable', ->
   it "returns an error on long table name", (done) ->
     Helper.assertInvalid {TableName: (n for n in [1..256])}, messages.invalidTableName(), false, done
 
+  it "returns an invalid table name", (done) ->
+    data = Helper.validData()
+    data['TableName'] = 'a b *'
+    Helper.assertInvalid data, messages.invalidPattern('tableName', 'a b *', /^[a-zA-Z0-9_.-]+$/), true, done
+
   it "returns an error on missing keySchema", (done) ->
     data = Helper.validData()
     delete data['KeySchema']

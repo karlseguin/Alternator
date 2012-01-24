@@ -10,6 +10,11 @@ class Messages
       __type: 'com.amazon.coral.validate#ValidationException'
       message: "The paramater 'tableName' must be at least 3 characters long and at most 255 characters long"
     }
+  @invalidPattern: (name, value, pattern) ->
+    return {
+      __type: 'com.amazon.coral.validate#ValidationException'
+      message: util.format("Value '%s' at '%s' failed to satisfy constraint: Member must satisfy regular expression pattern:%s", value, name, pattern)
+    }
   @cannotSerializeStringToLong: ->
     return {
       __type: 'com.amazon.coral.service#SerializationException'

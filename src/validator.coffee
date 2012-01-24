@@ -2,12 +2,15 @@ messages = require('./messages')
 util = require('util')
 
 class Validator
+  @tablePattern: /^[a-zA-Z0-9_.-]+$/
+
   @createTable: (data, callback) ->
     return unless Validator.tableName(data.TableName, callback) 
     return unless Validator.serializeToNumber(data.ProvisionedThroughput?.WriteCapacityUnits, callback)
     return unless Validator.serializeToNumber(data.ProvisionedThroughput?.ReadCapacityUnits, callback)
 
     errors = []
+    Validator.validPattern(data.TableName, 'tableName', Validator.tablePattern, errors)
     if Validator.notNull(data.KeySchema, 'keySchema', errors)
       if Validator.notNull(data.KeySchema.HashKeyElement, 'keySchema.hashKeyElement', errors)
         Validator.notNull(data.KeySchema.HashKeyElement.AttributeName, 'keySchema.hashKeyElement.attributeName', errors)
@@ -26,6 +29,14 @@ class Validator
     return unless Validator.serializeToNumber(data.limit, callback)
     return true
 
+  @deleteTable: (data, callback) ->
+    return unless Validator.tableName(data.TableName, callback) 
+    errors = []
+    Validator.validPattern(data.TableName, 'tableName', Validator.tablePattern, errors)
+    Validator.handleErrors(errors, callback)
+
+  @putItem: (data, callback) ->
+    
   @tableName: (name, callback) ->
     if !name? || name.length < 3 || name.length > 255
       callback(messages.invalidTableName(), null) 
@@ -44,6 +55,11 @@ class Validator
       errors.push(messages.invalidValueForEnum(name, value,  ['N', 'S']))
       return false
     return true
+
+  @validPattern: (value, name, pattern, errors) ->
+    return true if pattern.test(value)
+    errors.push(messages.invalidPattern(name, value, pattern))
+    return false
 
   @notNull: (value, name, errors) ->
     unless value?

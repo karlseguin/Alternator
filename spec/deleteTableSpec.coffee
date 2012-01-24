@@ -5,20 +5,23 @@ messages = require('../src/messages')
 describe 'deletTable', ->
 
   it "returns an error on null table name", (done) ->
-    Helper.assertInvalid(null, messages.invalidTableName(), done)
+    Helper.assertInvalid(null, messages.invalidTableName(), false, done)
 
   it "returns an error on null table name", (done) ->
-    Helper.assertInvalid('1', messages.invalidTableName(), done)
+    Helper.assertInvalid('1', messages.invalidTableName(), false, done)
 
   it "returns an error on null table name", (done) ->
-    Helper.assertInvalid((n for n in [1..259]), messages.invalidTableName(), done)
+    Helper.assertInvalid((n for n in [1..259]), messages.invalidTableName(), false, done)
+
+  it "returns an error on invalid table name", (done) ->
+    Helper.assertInvalid('over9000!!!', messages.invalidPattern('tableName', 'over9000!!!', /^[a-zA-Z0-9_.-]+$/), true, done)
 
   describe 'persistence', ->
     beforeEach (done) -> helper.setupDatabase(done)
     afterEach -> helper.closeDatabase()
 
     it "returns an error if the table doesn't exist", (done) ->
-      Helper.assertInvalid('unicorns', messages.tableNotFound('unicorns'), done)
+      Helper.assertInvalid('unicorns', messages.tableNotFound('unicorns'), false, done)
 
     it "deletes the table form the system table", (done) ->
       helper.async (db) ->
@@ -45,10 +48,12 @@ describe 'deletTable', ->
 
 
 class Helper
-  @assertInvalid: (name, expected, done) ->
+  @assertInvalid: (name, expected, includeCount, done) ->
     helper.async ->
       alternator.deleteTable {TableName: name}, (err, response) ->
         expect(response).toBeNull()
         expect(err.__type).toEqual(expected.__type)
-        expect(err.message).toEqual(expected.message)
+        expectedMessage = expected.message
+        expectedMessage = '1 validation error detected: ' + expectedMessage if includeCount == true
+        expect(err.message).toEqual(expectedMessage)
         done()

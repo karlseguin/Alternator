@@ -36,7 +36,14 @@ class Validator
     Validator.handleErrors(errors, callback)
 
   @putItem: (data, callback) ->
+    return unless Validator.tableName(data.TableName, callback) 
     
+    errors = []
+    Validator.validPattern(data.TableName, 'tableName', Validator.tablePattern, errors)
+    Validator.notNull(data.Item, 'item', errors)
+
+    Validator.handleErrors(errors, callback)
+       
   @tableName: (name, callback) ->
     if !name? || name.length < 3 || name.length > 255
       callback(messages.invalidTableName(), null) 

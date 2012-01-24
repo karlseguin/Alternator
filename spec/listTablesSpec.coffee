@@ -10,7 +10,7 @@ describe 'listTables', ->
     Helper.assertInvalid {ExclusiveStartTableName: '12'}, messages.invalidTableName(), done
 
   it "returns an error on long table name", (done) ->
-    Helper.assertInvalid {ExclusiveStartTableName: (n for n in [1..256])}, messages.invalidTableName(), done
+    Helper.assertInvalid {ExclusiveStartTableName: (n for n in [1..256]).join('')}, messages.invalidTableName(), done
 
   it "returns an error in invalid limit", (done) ->
     Helper.assertInvalid {limit: 'b'}, messages.cannotSerializeStringToLong(), done

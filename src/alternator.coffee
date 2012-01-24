@@ -101,13 +101,26 @@ class Alternator
         document._id = document[hashKey]
 
       delete document[hashKey]
-      this.db.collection(data.TableName).insert document, {safe: true}, (err, document) ->
-        return callback(err, null) if err?
-        callback(null)
+      collection = this.db.collection(data.TableName)
+      collection.findOne {_id: document._id}, (err, value) =>
+        collection.update {_id: document._id}, document, {safe: true, upsert: true}, (err, document) =>
+          return callback(err, null) if err?
+          value = if data.ReturnValue == 'ALL_OLD' then this.fixId(value, hashKey, rangeKey) else undefined
+          callback(null, value)
   
   @tableDetails: (name, callback) =>
     this.systemCollection().findOne {_id: name}, (err, value) ->
       return callback(err, null) if err?
       callback(null, if value? then value.details else null)
+
+  @fixId: (document, hashKey, rangeKey) =>
+    return undefined unless document?
+    if rangeKey?
+      document[key] = value for key, value of document._id
+    else
+      document[hashKey] = document._id
+    delete document._id
+    document
+
 
 module.exports = Alternator

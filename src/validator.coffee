@@ -37,6 +37,7 @@ class Validator
 
   @putItem: (data, details, callback) ->
     return unless Validator.crudDetails(data, 'Item', details, callback)
+    return unless Validator.validReturnValue(data.ReturnValue, callback)
   
     errors = []
     Validator.validPattern(data.TableName, 'tableName', Validator.tablePattern, errors)
@@ -117,6 +118,12 @@ class Validator
       return false
 
     return true
+  
+  @validReturnValue: (value, callback) ->
+    return true unless value? 
+    return true if value == 'ALL_OLD' || value == 'NONE'
+    callback(messages.invalidReturnValue(), null)
+    return false
 
   @handleErrors: (errors, callback) ->
     return true if errors.length == 0

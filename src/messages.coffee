@@ -50,6 +50,11 @@ class Messages
       __type: 'com.amazon.coral.validate#ValidationException'
       message: util.format('One or more parameter values were invalid: Type mismatch for key id expected: %s actual: %s', expected, actual)
     }
+  @invalidReturnValue: ->
+    return {
+      __type: 'com.amazon.coral.validate#ValidationException'
+      message: 'ReturnValues can only be ALL_OLD or NONE'
+    }
      
 
 module.exports = Messages

@@ -10,6 +10,12 @@ describe 'putItem', ->
       Item:
         id: {'N':1}
         name: {'S': 'Duncan'}
+
+    @rangeData =
+      TableName: 'votes'
+      Item:
+        id: {'S':'leto'}
+        count: {'N': 4}
     helper.setupDatabase(done)
   
   afterEach -> helper.closeDatabase()
@@ -50,4 +56,22 @@ describe 'putItem', ->
     data.TableName = 'votes'
     data.Item.count = {'S': '123'}
     helper.assertRequestError 'putItem', @data,  messages.invalidKeyType('S', 'N'), false, done
+  
+  it "saves an new item", (done) ->
+    helper.async (db) ->
+      alternator.putItem @data, (err, response) ->
+        expect(err).toBeNull()
+        expect(response).toBeUndefined(response)
+        db.collection('users').count {_id: 1, name: 'Duncan'}, (err, count) ->
+          expect(count).toEqual(1)
+          done()
+
+  it "saves an new item with a range key", (done) ->
+    helper.async (db) ->
+      alternator.putItem @rangeData, (err, response) ->
+        expect(err).toBeNull()
+        expect(response).toBeUndefined(response)
+        db.collection('votes').count {_id: {id: 'leto', count: 4}}, (err, count) ->
+          expect(count).toEqual(1)
+          done()
 

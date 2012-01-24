@@ -84,8 +84,26 @@ class Alternator
           callback(null, details)
 
   @putItem: (data, callback) =>
-    this.tableDetails data.TableName, (err, details) ->
+    this.tableDetails data.TableName, (err, details) =>
       return unless validator.putItem(data, details, callback)
+      document = {}
+      for key, value of data.Item
+        document[key] = if value['N']? then value['N'] else value['S'] #fix this crap, it's everwhere
+
+      hashKey = details.KeySchema.HashKeyElement.AttributeName
+      rangeKey = details.KeySchema.RangeKeyElement?.AttributeName
+      if rangeKey?
+        document._id = {}
+        document._id[hashKey] = document[hashKey]
+        document._id[rangeKey] = document[rangeKey]
+        delete document[rangeKey]
+      else
+        document._id = document[hashKey]
+
+      delete document[hashKey]
+      this.db.collection(data.TableName).insert document, {safe: true}, (err, document) ->
+        return callback(err, null) if err?
+        callback(null)
   
   @tableDetails: (name, callback) =>
     this.systemCollection().findOne {_id: name}, (err, value) ->

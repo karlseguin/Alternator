@@ -7,8 +7,12 @@ setupDatabase = (done) ->
     mongo = db
     db.collection('ddb_tables').drop ->
       db.collection('users').drop ->
-        db.collection('ddb_tables').insert {_id: 'users', details: {KeySchema: {HashKeyElement: {AttributeName: 'id', AttributeType: 'N'}}}}, ->
-          db.collection('ddb_tables').insert {_id: 'votes', details: {KeySchema: {HashKeyElement: {AttributeName: 'id', AttributeType: 'S'}, RangeKeyElement: {AttributeName: 'count', AttributeType: 'N'}}}}, ->
+        db.collection('votes').drop ->
+          tables = [
+            {_id: 'users', details: {KeySchema: {HashKeyElement: {AttributeName: 'id', AttributeType: 'N'}}}}
+            {_id: 'votes', details: {KeySchema: {HashKeyElement: {AttributeName: 'id', AttributeType: 'S'}, RangeKeyElement: {AttributeName: 'count', AttributeType: 'N'}}}}
+          ]
+          db.collection('ddb_tables').insert tables, ->
             done()
         
 

@@ -94,9 +94,9 @@ class Validator
     unless details.KeySchema.RangeKeyElement?
       return true
 
-    expected = details.KeySchema.RangeKeyElement.AttributeTypes
+    expected = details.KeySchema.RangeKeyElement.AttributeType
     unless value[details.KeySchema.RangeKeyElement.AttributeName][expected]?
-      return callback(message.invalidKeyType(expected, if expected == 'S' then 'N' else 'S'), null)
+      return callback(messages.invalidKeyType(expected, if expected == 'S' then 'N' else 'S'), null)
 
     return true
 

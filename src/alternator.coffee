@@ -70,7 +70,7 @@ class Alternator
 
   @deleteTable: (data, callback) =>
     tableName = data.TableName
-    return unless Validator.tableName(tableName, callback)
+    return unless validator.tableName(tableName, callback)
 
     this.tableDetails tableName, (err, details) =>
       return callback(err, null) if err?

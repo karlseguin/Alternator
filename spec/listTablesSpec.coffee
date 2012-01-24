@@ -44,7 +44,6 @@ class Helper
     helper.async ->
       alternator.listTables data, (err, response) ->
         expect(response).toBeNull()
-        return expected(err) unless done?
         expect(err.__type).toEqual(expected.__type)
         expect(err.message).toEqual(expected.message)
         done()

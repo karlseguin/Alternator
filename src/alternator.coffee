@@ -30,17 +30,20 @@ class Alternator
     @db.collection('ddb_tables')
 
   @createTable: (data, callback) =>
+    tableName = data.TableName
+    callback(Errors.invalidTableName(), null) if !tableName? || tableName.length < 3 || tableName.length > 255
+    
     doc =
-      _id: data.TableName,
+      _id: tableName,
       details:
         CreationDateTime: new Date().getTime(),
         KeySchema: data.KeySchema,
         ProvisionedThroughput: data.ProvisionedThroughput,  
-        TableName: data.TableName,
+        TableName: tableName,
         TableStatus: 'ACTIVE'
 
     this.systemCollection().insert doc, {safe: true}, (err) ->
-      return callback(Errors.duplicateTableName(data.TableName), null) if err && err.code == 11000
+      return callback(Errors.duplicateTableName(tableName), null) if err && err.code == 11000
       return callback(err, null) if err
       doc.details.TableStatus = 'CREATING'
       callback(null, {TableDescription: doc.details})
@@ -85,6 +88,11 @@ class Errors
     return {
       __type: 'com.amazonaws.dynamodb.v20111205#ResourceInUseException'
       message: 'Attempt to change a resource which is still in use: Duplicate table name: ' +  name
+    }
+  @invalidTableName: ->
+    return {
+      __type: 'com.amazon.coral.validate#ValidationExceptio'
+      message: "The paramater 'tableName' must be at least 3 characters long and at most 255 characters long"
     }
   @tableNotFound: (name) ->
     return {

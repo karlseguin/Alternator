@@ -84,7 +84,8 @@ class Alternator
           callback(null, details)
 
   @putItem: (data, callback) =>
-    return unless validator.putItem(data, callback)
+    this.tableDetails data.TableName, (err, details) ->
+      return unless validator.putItem(data, details, callback)
   
   @tableDetails: (name, callback) =>
     this.systemCollection().findOne {_id: name}, (err, value) ->

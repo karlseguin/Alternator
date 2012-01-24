@@ -31,7 +31,7 @@ describe 'deletTable', ->
             expect(err).toBeNull();
             expect(response).toEqual({blah: true, TableStatus: 'DELETING'})
             ddb.count {}, (err, count) ->
-              expect(count).toEqual(2)
+              expect(count).toEqual(3)
               ddb.count {_id: 'unicorns'}, (err, count) ->
                 expect(count).toEqual(0)
                 done()

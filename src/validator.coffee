@@ -35,9 +35,9 @@ class Validator
     Validator.validPattern(data.TableName, 'tableName', Validator.tablePattern, errors)
     Validator.handleErrors(errors, callback)
 
-  @putItem: (data, callback) ->
-    return unless Validator.tableName(data.TableName, callback) 
-    
+  @putItem: (data, details, callback) ->
+    return unless Validator.crudDetails(data, 'Item', details, callback)
+  
     errors = []
     Validator.validPattern(data.TableName, 'tableName', Validator.tablePattern, errors)
     Validator.notNull(data.Item, 'item', errors)
@@ -72,6 +72,50 @@ class Validator
     unless value?
       errors.push(messages.cannotBeNull(name))
       return false
+    return true
+
+  @keysArePresent: (value, details, callback) ->
+    unless value[details.KeySchema.HashKeyElement.AttributeName]?
+      return callback(messages.missingKey(), null) 
+    
+    unless details.KeySchema.RangeKeyElement?
+      return true
+
+    unless value[details.KeySchema.RangeKeyElement.AttributeName]?
+      return callback(messages.missingKey(), null) 
+
+    return true
+
+  @keysAreTyped: (value, details, callback) ->
+    expected = details.KeySchema.HashKeyElement.AttributeType
+    unless value[details.KeySchema.HashKeyElement.AttributeName][expected]?
+      return callback(messages.invalidKeyType(expected, if expected == 'S' then 'N' else 'S'), null)
+    
+    unless details.KeySchema.RangeKeyElement?
+      return true
+
+    expected = details.KeySchema.RangeKeyElement.AttributeTypes
+    unless value[details.KeySchema.RangeKeyElement.AttributeName][expected]?
+      return callback(message.invalidKeyType(expected, if expected == 'S' then 'N' else 'S'), null)
+
+    return true
+
+  @crudDetails: (data, keys, details, callback) ->
+    unless Validator.tableName(data.TableName, callback) 
+      return false
+
+    unless details?
+      return callback(messages.resourceNotFound(), null) 
+    
+    unless data[keys]?
+      return true
+
+    unless Validator.keysArePresent(data[keys], details, callback)
+      return false
+
+    unless Validator.keysAreTyped(data[keys], details, callback)
+      return false
+
     return true
 
   @handleErrors: (errors, callback) ->
